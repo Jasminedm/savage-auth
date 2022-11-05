@@ -1,0 +1,21 @@
+<!doctype html>
+<html>
+<head>
+    <title>Dictionary</title>
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+        <h2><%= dataResult["word"] %></h2>
+        <h2><%= dataResult["definition"] %></h2>
+    
+    <form action="sub" method="post">
+        <input type="text" name="userI">
+        <button class="userWordBtn" type="submit" >Get Definition</button><br>
+        <a href="/profile" class="btn btn-default btn-sm">Your Profile</a>
+        
+    </form>
+    <script src="../public/main.js" ></script>
+</body>
+</html>

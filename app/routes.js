@@ -9,15 +9,27 @@ module.exports = function(app, passport, db) {
 
     // PROFILE SECTION =========================
     app.get('/profile', isLoggedIn, function(req, res) {
-        db.collection('messages').find().toArray((err, result) => {
+        db.collection('datab').find({user: req.user.local.email}).toArray((err, result) => {
           if (err) return console.log(err)
           res.render('profile.ejs', {
             user : req.user,
-            messages: result
+            dataResult: result
           })
         })
     });
+    app.get('/definiPage', isLoggedIn, function(req, res) {
+      db.collection('datab').find({user: req.user.local.email}).toArray((err, result) => {
+        if (err) return console.log(err)
+        res.render('definiPage.ejs', {
+          user : req.user,
+          dataResult: result
+        })
+      })
+  });
 
+  app.get('/definiPageGo', async (req, res) => { 
+    
+})
     // LOGOUT ==============================
     app.get('/logout', function(req, res) {
         req.logout();
@@ -26,13 +38,34 @@ module.exports = function(app, passport, db) {
 
 // message board routes ===============================================================
 
-    app.post('/messages', (req, res) => {
-      db.collection('messages').save({name: req.body.name, msg: req.body.msg, thumbUp: 0, thumbDown:0}, (err, result) => {
+    app.post('/sub', (req, res) => {
+      db.collection('datab').findOne({user: req.user.local.email, word: req.body.userI}, (err, result) => {
         if (err) return console.log(err)
-        console.log('saved to database')
-        res.redirect('/profile')
+        if(result){
+      res.render('definiPageGo.ejs', {
+        dataResult : result,
+        user: req.user
       })
+    }else{
+      fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${req.body.userI}`) 
+    .then((res) => res.json())
+    .then((data) => {
+      let wordResult = data[0]["meanings"][0]['definitions'][0]['definition']
+      db.collection('datab').save({user: req.user.local.email, word: req.body.userI, definition: wordResult 
+      }, (err, result) => {
+        console.log(wordResult)
+      if (err) return console.log(err)
+      console.log('saved to database')
+      res.redirect(307, '/sub')
+    
     })
+    })
+    }
+      })
+      
+    })
+    
+    
 
     
 
@@ -68,7 +101,7 @@ module.exports = function(app, passport, db) {
     // })
 
     app.delete('/messages', (req, res) => {
-      db.collection('messages').findOneAndDelete({name: req.body.name, msg: req.body.msg}, (err, result) => {
+      db.collection('datab').findOneAndDelete({name: req.body.name, msg: req.body.msg}, (err, result) => {
         if (err) return res.send(500, err)
         res.send('Message deleted!')
       })
